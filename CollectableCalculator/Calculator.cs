@@ -15,6 +15,18 @@ namespace CollectableCalculator
 {
     internal sealed class Calculator
     {
+        private readonly IReadOnlyList<InventoryType> _inventoryTypes = new List<InventoryType>
+        {
+            InventoryType.Inventory1,
+            InventoryType.Inventory2,
+            InventoryType.Inventory3,
+            InventoryType.Inventory4,
+            InventoryType.SaddleBag1,
+            InventoryType.SaddleBag2,
+            InventoryType.PremiumSaddleBag1,
+            InventoryType.PremiumSaddleBag2,
+        }.AsReadOnly();
+
         private readonly DataManager _dataManager;
         private readonly ClientState _clientState;
         private readonly ItemWindow _itemWindow;
@@ -161,7 +173,7 @@ namespace CollectableCalculator
                 return new();
 
             List<ActualReward> rewards = new();
-            for (InventoryType inventory = InventoryType.Inventory1; inventory < InventoryType.Inventory4; ++inventory)
+            foreach (InventoryType inventory in _inventoryTypes)
             {
                 InventoryContainer* container = manager->GetInventoryContainer(inventory);
                 if (container == null || container->Loaded == 0)

@@ -8,6 +8,7 @@
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <DebugType>portable</DebugType>
     </PropertyGroup>
 

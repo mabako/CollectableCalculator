@@ -112,7 +112,7 @@ namespace CollectableCalculator
                     if (!shop.TryGetValue(row.CollectablesShopRewardScrip.Row, out var reward))
                         return null;
 
-                    PluginLog.Information($"Handling {row.RowId}.{row.SubRowId} -> {row.Item.Row}");
+                    PluginLog.Verbose($"Handling {row.RowId}.{row.SubRowId} -> {row.Item.Row}");
 
                     CollectablesShopRefine? refine = row.CollectablesShopRefine.Value;
                     return new CollectableItem

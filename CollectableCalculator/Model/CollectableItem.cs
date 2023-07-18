@@ -21,7 +21,13 @@ namespace CollectableCalculator.Model
         public ActualReward? FindByCollectability(ushort quality)
         {
             return Collectabilities.Where(c => quality >= c.MinimumQuality)
-                .Select(c => new ActualReward { Item = RewardItem, Quantity = c.Quantity })
+                .Select(c => new ActualReward
+                {
+                    Item = RewardItem,
+                    RewardType = RewardType,
+                    QuantityToTurnIn = c.Quantity,
+                    QuantityInInventory = 0
+                })
                 .FirstOrDefault();
         }
     }

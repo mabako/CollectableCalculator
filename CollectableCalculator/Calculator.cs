@@ -193,8 +193,14 @@ namespace CollectableCalculator
                 }
             }
 
-            return rewards.GroupBy(x => x.Item, x => x.Quantity)
-                .Select(group => new ActualReward { Item = group.Key, Quantity = group.Sum() })
+            return rewards.GroupBy(x => new { x.Item, x.RewardType }, x => x.QuantityToTurnIn)
+                .Select(group => new ActualReward
+                {
+                    Item = group.Key.Item,
+                    RewardType = group.Key.RewardType,
+                    QuantityToTurnIn = group.Sum(),
+                    QuantityInInventory = InventoryManager.Instance()->GetInventoryItemCount(group.Key.Item.Id)
+                })
                 .OrderBy(c => c.Item.Id)
                 .ToList();
         }

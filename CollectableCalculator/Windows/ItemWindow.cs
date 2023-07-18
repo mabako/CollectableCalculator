@@ -10,12 +10,14 @@ namespace CollectableCalculator.Windows
     internal sealed class ItemWindow : Window
     {
         private readonly IconCache _iconCache;
+        private readonly Configuration _configuration;
         private List<ActualReward> _currentRewards = new();
 
-        public ItemWindow(IconCache iconCache)
+        public ItemWindow(IconCache iconCache, Configuration configuration)
             : base("Collectables Summary###CollectableCalculatorItems")
         {
             _iconCache = iconCache;
+            _configuration = configuration;
 
             Position = new Vector2(300, 300);
             PositionCondition = ImGuiCond.FirstUseEver;
@@ -45,7 +47,13 @@ namespace CollectableCalculator.Windows
                     ImGui.SameLine();
                 }
 
-                ImGui.TextUnformatted($"{item.Quantity}x {item.Item.Name}");
+                if (item.QuantityInInventory > 0 && (
+                        (item.RewardType == ERewardType.Scrips && _configuration.ShowTotalForScrips) ||
+                        (item.RewardType == ERewardType.Item && _configuration.ShowTotalForItems)))
+                    ImGui.TextUnformatted(
+                        $"{item.QuantityToTurnIn:N0}x ({(item.QuantityToTurnIn + item.QuantityInInventory):N0}x) {item.Item.Name}");
+                else
+                    ImGui.TextUnformatted($"{item.QuantityToTurnIn:N0}x {item.Item.Name}");
             }
         }
 

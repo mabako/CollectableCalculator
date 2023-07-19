@@ -3,7 +3,7 @@
   "Author": "Liza Carvelli",
   "Punchline": "Shows how many scrips and items you would receive if you turn in your current inventory.",
   "Description": "Shows how many scrips and items you would receive if you turn in your current inventory.",
-  "RepoUrl": "https://github.com/carvelli/CollectableCalculator",
+  "RepoUrl": "https://github.com/mabako/CollectableCalculator",
   "Tags": [
     "scrips",
     "collectable"

@@ -1,8 +1,7 @@
-namespace CollectableCalculator.Model
+namespace CollectableCalculator.Model;
+
+internal enum ERewardType
 {
-    internal enum ERewardType
-    {
-        Item,
-        Scrips,
-    }
+    Item,
+    Scrips,
 }

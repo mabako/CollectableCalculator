@@ -1,8 +1,7 @@
-namespace CollectableCalculator.Model
+namespace CollectableCalculator.Model;
+
+internal sealed class Collectability
 {
-    internal sealed class Collectability
-    {
-        public required ushort MinimumQuality { get; init; }
-        public required int Quantity { get; init; }
-    }
+    public required ushort MinimumQuality { get; init; }
+    public required int Quantity { get; init; }
 }

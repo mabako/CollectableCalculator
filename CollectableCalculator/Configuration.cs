@@ -2,7 +2,7 @@
 
 namespace CollectableCalculator;
 
-public class Configuration : IPluginConfiguration
+internal sealed class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 1;
 

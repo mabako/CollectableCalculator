@@ -5,7 +5,7 @@ using ImGuiNET;
 
 namespace CollectableCalculator.Windows;
 
-public class ConfigWindow : Window
+internal sealed class ConfigWindow : Window
 {
     private readonly Configuration _configuration;
     private readonly DalamudPluginInterface _pluginInterface;

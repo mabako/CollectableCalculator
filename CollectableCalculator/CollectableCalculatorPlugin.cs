@@ -9,19 +9,15 @@ namespace CollectableCalculator;
 // ReSharper disable once UnusedType.Global
 internal sealed class CollectableCalculatorPlugin : IDalamudPlugin
 {
-    public string Name => "CollectableCalculator";
-
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly IFramework _framework;
     private readonly ICommandManager _commandManager;
     private readonly WindowSystem _windowSystem;
-    private readonly IconCache _iconCache;
-    private readonly Configuration _configuration;
     private readonly Calculator _calculator;
     private readonly ItemWindow _itemWindow;
     private readonly ConfigWindow _configWindow;
 
-    public CollectableCalculatorPlugin(DalamudPluginInterface pluginInterface, IFramework framework,
+    public CollectableCalculatorPlugin(IDalamudPluginInterface pluginInterface, IFramework framework,
         IDataManager dataManager, ITextureProvider textureProvider, ICommandManager commandManager,
         IClientState clientState, IPluginLog pluginLog)
     {
@@ -29,11 +25,9 @@ internal sealed class CollectableCalculatorPlugin : IDalamudPlugin
         _framework = framework;
         _commandManager = commandManager;
 
-        _iconCache = new IconCache(textureProvider);
-
-        _configuration = (Configuration?)_pluginInterface.GetPluginConfig() ?? new Configuration();
-        _itemWindow = new ItemWindow(_iconCache, _configuration);
-        _configWindow = new ConfigWindow(_configuration, _pluginInterface);
+        var configuration = (Configuration?)_pluginInterface.GetPluginConfig() ?? new Configuration();
+        _itemWindow = new ItemWindow(textureProvider, configuration);
+        _configWindow = new ConfigWindow(configuration, _pluginInterface);
         _windowSystem = new(typeof(CollectableCalculatorPlugin).AssemblyQualifiedName);
         _windowSystem.AddWindow(_itemWindow);
         _windowSystem.AddWindow(_configWindow);
@@ -41,7 +35,8 @@ internal sealed class CollectableCalculatorPlugin : IDalamudPlugin
         _calculator = new Calculator(dataManager, clientState, _itemWindow, pluginLog);
 
         _pluginInterface.UiBuilder.Draw += _windowSystem.Draw;
-        _pluginInterface.UiBuilder.OpenConfigUi += _configWindow.OpenConfigWindow;
+        _pluginInterface.UiBuilder.OpenMainUi += _itemWindow.Toggle;
+        _pluginInterface.UiBuilder.OpenConfigUi += _configWindow.Toggle;
         _framework.Update += _calculator.Update;
 
         _commandManager.AddHandler("/cc", new CommandInfo(ToggleCalculator)
@@ -58,10 +53,9 @@ internal sealed class CollectableCalculatorPlugin : IDalamudPlugin
     public void Dispose()
     {
         _framework.Update -= _calculator.Update;
-        _pluginInterface.UiBuilder.OpenConfigUi -= _configWindow.OpenConfigWindow;
+        _pluginInterface.UiBuilder.OpenConfigUi -= _configWindow.Toggle;
+        _pluginInterface.UiBuilder.OpenMainUi -= _itemWindow.Toggle;
         _pluginInterface.UiBuilder.Draw -= _windowSystem.Draw;
-
-        _iconCache.Dispose();
 
         _commandManager.RemoveHandler("/cc");
     }

@@ -8,12 +8,12 @@ namespace CollectableCalculator.Windows;
 internal sealed class ConfigWindow : Window
 {
     private readonly Configuration _configuration;
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
 
     private bool _showTotalForScrips;
     private bool _showTotalForItems;
 
-    public ConfigWindow(Configuration configuration, DalamudPluginInterface pluginInterface)
+    public ConfigWindow(Configuration configuration, IDalamudPluginInterface pluginInterface)
         : base("Collectables Configuration###CollectableCalculatorConfiguration")
     {
         _configuration = configuration;
@@ -58,10 +58,5 @@ internal sealed class ConfigWindow : Window
 
         if (close || saveAndClose)
             IsOpen = false;
-    }
-
-    public void OpenConfigWindow()
-    {
-        IsOpen = !IsOpen;
     }
 }

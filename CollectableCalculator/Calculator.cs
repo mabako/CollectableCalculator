@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CollectableCalculator.Model;
 using CollectableCalculator.Windows;
-using Dalamud;
+using Dalamud.Game;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.GeneratedSheets;
@@ -82,10 +82,10 @@ internal sealed class Calculator
                     RewardType = ERewardType.Scrips,
                     RewardItem = c.Currency switch
                     {
-                        2 => 25199, // white crafter
-                        6 => 33913, // purple crafter
-                        4 => 25200, // white gatherer
-                        7 => 33914, // purple gatherer
+                        2 => 33913, // purple crafter
+                        6 => 41784, // orange crafter
+                        4 => 33914, // purple gatherer
+                        7 => 41785, // orange gatherer
                         _ => 0,
                     },
                     LowQuantity = c.LowReward,
@@ -167,6 +167,7 @@ internal sealed class Calculator
         if (!_clientState.IsLoggedIn || _clientState.IsPvPExcludingDen || !_itemWindow.IsOpen)
             return new();
 
+#if !MOCK_INVENTORY
         var manager = InventoryManager.Instance();
         if (manager == null)
             return new();
@@ -181,8 +182,8 @@ internal sealed class Calculator
             for (int index = 0; index < container->Size; ++index)
             {
                 var item = container->GetInventorySlot(index);
-                if (item == null || item->ItemID == 0 ||
-                    !_collectableItems.TryGetValue(item->ItemID, out var collectableItem))
+                if (item == null || item->ItemId == 0 ||
+                    !_collectableItems.TryGetValue(item->ItemId, out var collectableItem))
                     continue;
 
 
@@ -191,6 +192,16 @@ internal sealed class Calculator
                     rewards.Add(reward);
             }
         }
+#else
+        List<ActualReward> rewards =
+        [
+            _collectableItems[44231].FindByCollectability(627)!,
+            _collectableItems[44232].FindByCollectability(1200)!,
+            _collectableItems[44233].FindByCollectability(799)!,
+            _collectableItems[43923].FindByCollectability(900)!,
+
+        ];
+#endif
 
         return rewards.GroupBy(x => new { x.Item, x.RewardType }, x => x.QuantityToTurnIn)
             .Select(group => new ActualReward

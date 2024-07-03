@@ -1,22 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 using CollectableCalculator.Model;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace CollectableCalculator.Windows;
 
 internal sealed class ItemWindow : Window
 {
-    private readonly IconCache _iconCache;
+    private readonly ITextureProvider _textureProvider;
     private readonly Configuration _configuration;
     private List<ActualReward> _currentRewards = new();
 
-    public ItemWindow(IconCache iconCache, Configuration configuration)
+    public ItemWindow(ITextureProvider textureProvider, Configuration configuration)
         : base("Collectables Summary###CollectableCalculatorItems")
     {
-        _iconCache = iconCache;
+        _textureProvider = textureProvider;
         _configuration = configuration;
 
         Position = new Vector2(300, 300);
@@ -40,11 +42,13 @@ internal sealed class ItemWindow : Window
         foreach (var item in _currentRewards)
         {
             ImGui.Spacing();
-            IDalamudTextureWrap? icon = _iconCache.GetIcon(item.Item.IconId);
-            if (icon != null)
+            ISharedImmediateTexture icon = _textureProvider.GetFromGameIcon(new GameIconLookup(item.Item.IconId));
+            if (icon.TryGetWrap(out IDalamudTextureWrap? wrap, out _))
             {
-                ImGui.Image(icon.ImGuiHandle, new Vector2(21, 21));
+                ImGui.Image(wrap.ImGuiHandle, new Vector2(21, 21));
                 ImGui.SameLine();
+
+                wrap.Dispose();
             }
 
             if (item.QuantityInInventory > 0 && (

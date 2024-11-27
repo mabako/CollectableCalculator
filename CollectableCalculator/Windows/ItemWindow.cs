@@ -11,12 +11,13 @@ namespace CollectableCalculator.Windows;
 
 internal sealed class ItemWindow : Window
 {
+    private const string Title = "Collectables Summary";
     private readonly ITextureProvider _textureProvider;
     private readonly Configuration _configuration;
     private List<ActualReward> _currentRewards = new();
 
     public ItemWindow(ITextureProvider textureProvider, Configuration configuration)
-        : base("Collectables Summary###CollectableCalculatorItems")
+        : base($"{Title}###CollectableCalculatorItems")
     {
         _textureProvider = textureProvider;
         _configuration = configuration;
@@ -28,6 +29,13 @@ internal sealed class ItemWindow : Window
         SizeCondition = ImGuiCond.FirstUseEver;
 
         Flags = ImGuiWindowFlags.AlwaysAutoResize;
+        SizeConstraints = new()
+        {
+            // AlwaysAutoResize ignores the title bar size (title/any icons) and just resizes the window according to
+            // the content; so we make sure the title bar is rendered properly (icons like the hamburger menu scale with
+            // font size)
+            MinimumSize = new Vector2(ImGui.CalcTextSize(Title).X + 4 * ImGui.GetFontSize(), 40)
+        };
     }
 
     public override void Draw()

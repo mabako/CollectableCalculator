@@ -6,7 +6,7 @@ using CollectableCalculator.Windows;
 using Dalamud.Game;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace CollectableCalculator;
 
@@ -64,18 +64,18 @@ internal sealed class Calculator
 
     private void InitializeData()
     {
-        var itemRewards = _dataManager.GetExcelSheet<CollectablesShopRewardItem>()!
+        var itemRewards = _dataManager.GetExcelSheet<CollectablesShopRewardItem>()
             .ToDictionary(c => c.RowId, c =>
                 new Reward
                 {
                     RewardType = ERewardType.Item,
-                    RewardItem = c.Item.Row,
+                    RewardItem = c.Item.RowId,
                     LowQuantity = c.RewardLow,
                     MidQuantity = c.RewardMid,
                     HighQuantity = c.RewardHigh,
                 });
 
-        var scripRewards = _dataManager.GetExcelSheet<CollectablesShopRewardScrip>()!
+        var scripRewards = _dataManager.GetExcelSheet<CollectablesShopRewardScrip>()
             .ToDictionary(c => c.RowId, c =>
                 new Reward
                 {
@@ -95,32 +95,33 @@ internal sealed class Calculator
 
         // this is a pretty hack-ish way to determine scrip/item shops, but there's no consistent value to map all
         // (`Key` seems to be the most likely in the ShopItem sheet, but that's inaccurate for Oddly Specific mats)
-        var shopRewards = _dataManager.GetExcelSheet<CollectablesShopItemGroup>(ClientLanguage.English)!
-            .Where(c => c.RowId != 0 && !string.IsNullOrEmpty(c.Name.RawString))
+        var shopRewards = _dataManager.GetExcelSheet<CollectablesShopItemGroup>(ClientLanguage.English)
+            .Where(c => c.RowId != 0 && !string.IsNullOrEmpty(c.Name.ToString()))
             .ToDictionary(c => c.RowId,
-                c => c.Name.RawString.StartsWith("Lv.") ? scripRewards : itemRewards);
+                c => c.Name.ToString().StartsWith("Lv.") ? scripRewards : itemRewards);
 
-        _collectableItems = _dataManager.GetExcelSheet<CollectablesShopItem>()!
+        _collectableItems = _dataManager.GetSubrowExcelSheet<CollectablesShopItem>()
+            .Flatten()
             .Where(row =>
-                row.RowId != 0 && row.CollectablesShopRefine.Row != 0 && row.CollectablesShopItemGroup.Row != 0)
+                row.RowId != 0 && row.CollectablesShopRefine.RowId != 0 && row.CollectablesShopItemGroup.RowId != 0)
             .Select(row =>
             {
-                if (!shopRewards.TryGetValue(row.CollectablesShopItemGroup.Row, out var shop))
+                if (!shopRewards.TryGetValue(row.CollectablesShopItemGroup.RowId, out var shop))
                     return null;
 
-                if (!shop.TryGetValue(row.CollectablesShopRewardScrip.Row, out var reward))
+                if (!shop.TryGetValue(row.CollectablesShopRewardScrip.RowId, out var reward))
                     return null;
 
-                _pluginLog.Verbose($"Handling {row.RowId}.{row.SubRowId} -> {row.Item.Row}");
+                _pluginLog.Verbose($"Handling {row.RowId}.{row.SubrowId} -> {row.Item.RowId}");
 
-                CollectablesShopRefine? refine = row.CollectablesShopRefine.Value;
+                CollectablesShopRefine? refine = row.CollectablesShopRefine.ValueNullable;
                 return new CollectableItem
                 {
                     TurnInItem = new ItemRef
                     {
-                        Id = row.Item.Row,
-                        Name = GetItemName(row.Item.Row),
-                        IconId = GetIconId(row.Item.Row),
+                        Id = row.Item.RowId,
+                        Name = GetItemName(row.Item.RowId),
+                        IconId = GetIconId(row.Item.RowId),
                     },
                     RewardType = reward.RewardType,
                     RewardItem = new ItemRef
@@ -154,12 +155,12 @@ internal sealed class Calculator
 
     private string GetItemName(uint itemId)
     {
-        return _dataManager.GetExcelSheet<Item>()!.GetRow(itemId)?.Name?.ToString() ?? $"Unknown #{itemId}";
+        return _dataManager.GetExcelSheet<Item>().GetRowOrDefault(itemId)?.Name.ToString() ?? $"Unknown #{itemId}";
     }
 
     private ushort GetIconId(uint itemId)
     {
-        return _dataManager.GetExcelSheet<Item>()!.GetRow(itemId)?.Icon ?? 0;
+        return _dataManager.GetExcelSheet<Item>().GetRowOrDefault(itemId)?.Icon ?? 0;
     }
 
     private unsafe List<ActualReward> CalculateInventorySums()

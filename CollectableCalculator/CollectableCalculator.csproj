@@ -1,6 +1,6 @@
 <Project Sdk="Dalamud.NET.Sdk/11.0.0">
     <PropertyGroup>
-        <Version>4.0</Version>
+        <Version>4.1</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 </Project>

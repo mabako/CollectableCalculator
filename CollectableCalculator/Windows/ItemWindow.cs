@@ -29,7 +29,11 @@ internal sealed class ItemWindow : Window
         SizeCondition = ImGuiCond.FirstUseEver;
 
         Flags = ImGuiWindowFlags.AlwaysAutoResize;
-        SizeConstraints = new()
+    }
+
+    public override void OnOpen()
+    {
+        SizeConstraints ??= new()
         {
             // AlwaysAutoResize ignores the title bar size (title/any icons) and just resizes the window according to
             // the content; so we make sure the title bar is rendered properly (icons like the hamburger menu scale with

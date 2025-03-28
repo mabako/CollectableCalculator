@@ -1,8 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using CollectableCalculator.Model;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
@@ -14,7 +18,7 @@ internal sealed class ItemWindow : Window
     private const string Title = "Collectables Summary";
     private readonly ITextureProvider _textureProvider;
     private readonly Configuration _configuration;
-    private List<ActualReward> _currentRewards = new();
+    private List<ConditionalReward> _currentRewards = new();
 
     public ItemWindow(ITextureProvider textureProvider, Configuration configuration)
         : base($"{Title}###CollectableCalculatorItems")
@@ -63,17 +67,54 @@ internal sealed class ItemWindow : Window
                 wrap.Dispose();
             }
 
+            string label;
+            if (item.HasOptionalRewards())
+                label = $"{item.MinimumRewardQuantity:N0} - {item.MaximumRewardQuantity:N0}x";
+            else
+                label = $"{item.MinimumRewardQuantity:N0}x";
+
             if (item.QuantityInInventory > 0 && (
                     (item.RewardType == ERewardType.Scrips && _configuration.ShowTotalForScrips) ||
                     (item.RewardType == ERewardType.Item && _configuration.ShowTotalForItems)))
-                ImGui.TextUnformatted(
-                    $"{item.QuantityToTurnIn:N0}x ({(item.QuantityToTurnIn + item.QuantityInInventory):N0}x) {item.Item.Name}");
-            else
-                ImGui.TextUnformatted($"{item.QuantityToTurnIn:N0}x {item.Item.Name}");
+            {
+                if (item.HasOptionalRewards())
+                    label +=
+                        $" ({item.MinimumRewardQuantity + item.QuantityInInventory:N0} - {item.MaximumRewardQuantity + item.QuantityInInventory:N0}x)";
+                else
+                    label += $" ({item.MinimumRewardQuantity + item.QuantityInInventory:N0}x)";
+            }
+
+            label += $" {item.Item.Name}";
+            ImGui.TextUnformatted(label);
+
+            if (item.HasOptionalRewards())
+            {
+                ImGui.SameLine();
+                using (ImRaii.PushFont(UiBuilder.IconFont))
+                {
+                    ImGui.TextDisabled(FontAwesomeIcon.InfoCircle.ToIconString());
+                }
+
+                if (ImGui.IsItemHovered())
+                {
+                    using var tooltip = ImRaii.Tooltip();
+                    if (tooltip)
+                    {
+                        var groups = item.TurnInQuantityPerJob.GroupBy(x => x.Value, x => x.Key)
+                            .OrderByDescending(x => x.Key);
+                        foreach (var group in groups)
+                        {
+                            ImGui.Text($"You will earn {group.Key:N0}x if you turn your items in as:");
+                            foreach (EClassJob classJob in group)
+                                ImGui.BulletText(classJob.ToString());
+                        }
+                    }
+                }
+            }
         }
     }
 
-    public void Update(List<ActualReward> currentRewards)
+    public void Update(List<ConditionalReward> currentRewards)
     {
         _currentRewards = currentRewards;
     }

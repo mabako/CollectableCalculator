@@ -177,7 +177,7 @@ internal sealed class Calculator
         foreach (InventoryType inventory in _inventoryTypes)
         {
             InventoryContainer* container = manager->GetInventoryContainer(inventory);
-            if (container == null || container->Loaded == 0)
+            if (container == null || !container->IsLoaded)
                 continue;
 
             for (int index = 0; index < container->Size; ++index)
@@ -188,7 +188,7 @@ internal sealed class Calculator
                     continue;
 
 
-                ActualReward? reward = collectableItem.FindByCollectability(item->Spiritbond);
+                ActualReward? reward = collectableItem.FindByCollectability(item->SpiritbondOrCollectability);
                 if (reward != null)
                     rewards.Add(reward);
             }

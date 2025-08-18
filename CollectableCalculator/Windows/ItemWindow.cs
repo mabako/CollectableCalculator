@@ -2,14 +2,13 @@
 using System.Linq;
 using System.Numerics;
 using CollectableCalculator.Model;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using Dalamud.Interface.Components;
 using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
 
 namespace CollectableCalculator.Windows;
 
@@ -61,7 +60,7 @@ internal sealed class ItemWindow : Window
             ISharedImmediateTexture icon = _textureProvider.GetFromGameIcon(new GameIconLookup(item.Item.IconId));
             if (icon.TryGetWrap(out IDalamudTextureWrap? wrap, out _))
             {
-                ImGui.Image(wrap.ImGuiHandle, new Vector2(21, 21));
+                ImGui.Image(wrap.Handle, new Vector2(21, 21));
                 ImGui.SameLine();
 
                 wrap.Dispose();

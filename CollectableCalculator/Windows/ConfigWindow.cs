@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
-using ImGuiNET;
 
 namespace CollectableCalculator.Windows;
 

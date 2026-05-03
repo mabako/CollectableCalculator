@@ -97,16 +97,13 @@ internal sealed class ItemWindow : Window
                 if (ImGui.IsItemHovered())
                 {
                     using var tooltip = ImRaii.Tooltip();
-                    if (tooltip)
+                    var groups = item.TurnInQuantityPerJob.GroupBy(x => x.Value, x => x.Key)
+                        .OrderByDescending(x => x.Key);
+                    foreach (var group in groups)
                     {
-                        var groups = item.TurnInQuantityPerJob.GroupBy(x => x.Value, x => x.Key)
-                            .OrderByDescending(x => x.Key);
-                        foreach (var group in groups)
-                        {
-                            ImGui.Text($"You will earn {group.Key:N0}x if you turn your items in as:");
-                            foreach (EClassJob classJob in group)
-                                ImGui.BulletText(classJob.ToString());
-                        }
+                        ImGui.Text($"You will earn {group.Key:N0}x if you turn your items in as:");
+                        foreach (EClassJob classJob in group)
+                            ImGui.BulletText(classJob.ToString());
                     }
                 }
             }
